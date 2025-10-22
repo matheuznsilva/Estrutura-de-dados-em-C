@@ -1,15 +1,38 @@
-struct data{		// struct do tipo dado, basicamente onde é armazenado os dados inseridos na pilha
-	float NUMBER;		// variável onde será armasenado o dado do tipo float  
+#ifndef STACK_H
+#define STACK_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stddef.h> 
+
+// ----------------------------------------------------
+// Estrutura de Dados (Item armazenado na pilha)
+struct data{		
+	float NUMBER; // Variável onde será armazenado o dado do tipo float  
 };
 
-typedef struct element* Stack;
+// ----------------------------------------------------
+// Tipo OPACO (Handle) para a Pilha
+// O utilizador só vê o ponteiro, a estrutura interna (struct stack)
+typedef struct stack Stack; 
 
-// DECLARACAO DAS FUNCOES BASICAS DA PILHA
+// ----------------------------------------------------
+// PROTÓTIPOS DAS FUNÇÕES DA PILHA (Stack)
+// Nota: 'insertStack' é o termo para PUSH, 'removeStack' para POP.
 
+// Funções de Gerenciamento da Pilha
 Stack* createStack();
 void freeStack(Stack* ST);
-int accessTopStack(Stack* ST, struct data *DT);
-int insertStack(Stack* ST, struct data DT);
+int sizeStack(const Stack* ST);
+int emptyStack(const Stack* ST);
+
+//Adiciona um elemento ao topo da pilha (PUSH).
+int insertStack(Stack* ST, struct data dt);
+
+//Remove o elemento do topo da pilha (POP).
 int removeStack(Stack* ST);
-int sizeStack(Stack* ST);
-int emptyStack(Stack* ST);
+
+//Acessa (mas não remove) o elemento do topo da pilha (PEEK).
+int accessTopStack(const Stack* ST, struct data *dt);
+
+#endif // STACK_H

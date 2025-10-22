@@ -1,96 +1,137 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "ReversePolish.h"
+#include "Stack.h" // Inclui os protótipos e struct data
 
-//Definição do tipo lista
+// ----------------------------------------------------
+// 1. Definições Internas (Estruturas Ocultas)
 
+// Definição do Tipo Elemento (Nó da Pilha)
+typedef struct element Elem;
 struct element{
-	struct data DATA;		// campo do tipo dado
-	struct element *next;		// ponteiro que armazena a proxima posicao da pilha 
+	struct data data;
+	Elem *next;
 };
 
-typedef struct element Elem;		// definição de um nome padrão para a struct elemento
+// Definição da Estrutura de Gestão da Pilha (Handle)
+struct stack{
+  Elem *head; // Ponteiro para o elemento do topo
+  int size;   // Armazena o tamanho atual (O(1) para sizeStack)
+};
 
-// FUNCOES BASICAS DA PILHA 
+// ----------------------------------------------------
+// 2. FUNÇÕES DE CRIAÇÃO E DESTRUIÇÃO
 
-Stack* createStack(){       // Funcao de criacao da pilha
-    Stack* ST = (Stack*) malloc(sizeof(Stack));
-    if (ST != NULL){
-        *ST = NULL;
-    }
-    return ST;
+/**
+ * Cria e inicializa a estrutura de gestão da pilha.
+ * retorna um ponteiro para a nova Pilha ou NULL em caso de falha.
+*/
+Stack* createStack(){ 
+  // Aloca memória para a estrutura de gestão (handle)
+  Stack* ST = (Stack*) malloc(sizeof(struct stack));
+
+  if (ST != NULL){
+    ST->head = NULL; // Inicializa o topo da pilha como NULL
+    ST->size = 0;    // Inicializa o contador de tamanho
+  }
+  return ST;
 }
 
-void freeStack(Stack* ST){      // Funcao de destruicao da pilha
-    if (ST != NULL){
-        Elem* NO;
-        while ((*ST)!= NULL){
-            NO = *ST;
-            *ST = (*ST)->next;
-            free(NO);
-        }
-        free(ST);
+/**
+ * Libera a memória de todos os nós e da estrutura de gestão da pilha.
+ * ST - Ponteiro para a Pilha.
+*/
+void freeStack(Stack* ST){
+  if (ST != NULL){
+    Elem* current = ST->head;
+    Elem* next_node;
+    
+    while (current != NULL){
+      next_node = current->next;
+      free(current);
+      current = next_node;
     }
+    free(ST); // Libera a estrutura de gestão por último
+  }
 }
 
-int sizeStack(Stack* ST){       // Funcao que retorna o tamanho da pilha
-    if(ST == NULL){
-        return 0;
-    }
-    int COUNT = 0;
-    Elem* NO = *ST;
-    while (NO != NULL){
-        COUNT++;
-        NO = NO->next;
-    }
-    return COUNT;    
-}
+// ----------------------------------------------------
+// 3. FUNÇÕES DE CONSULTA
 
-int emptyStack(Stack* ST){       // Funcao que retorna se a pilha está vazia 
-    if(ST == NULL){
-        return 1;
-    }
-    if(*ST == NULL){
-        return 1;
-    }
+int sizeStack(const Stack* ST){
+  if(ST == NULL){
     return 0;
+  }
+  // Retorna o numero de elementos na pilha (O(1)). 
+  return ST->size;    
 }
 
-int insertStack(Stack* ST, struct data DT){       // Funcao de insercao na pilha (Lembrando que pilha e LIFO)
-    if(ST == NULL){
-        return 0;
-    }
-    Elem* NO;
-    NO = (Elem*) malloc(sizeof(Elem));
-    if(NO == NULL){
-        return 0;
-    }
-    NO->DATA = DT;
-    NO->next = (*ST);
-    *ST = NO;
+// Verifica se a pilha está vazia, retorna 1 se vazia ou NULL, 0 caso contrário.
+int emptyStack(const Stack* ST){
+  if(ST == NULL || ST->head == NULL){
     return 1;
+  }
+  return 0;
 }
 
-int removeStack(Stack* ST){       // Funcao de remocao na pilha (Essa remocao sempre acontece do topo) 
-    if(ST == NULL){
-        return 0;
-    }
-    if((*ST) == NULL){
-        return 0;
-    }
-    Elem *NO = *ST;
-    *ST = NO->next;
-    free(NO);
-    return 1;
+// Acessa (mas não remove) o elemento do topo da pilha (PEEK), retorna 1 em sucesso, 0 em falha.
+int accessTopStack(const Stack* ST, struct data *dt){ 
+  if(ST == NULL || ST->head == NULL){
+    return 0; // Pilha inexistente ou vazia
+  }
+  *dt = ST->head->data; // O topo é sempre o 'head'
+  return 1;
 }
 
-int accessTopStack(Stack* ST, struct data *DT){       // Funcao que acessa o topo da pilha
-    if(ST == NULL){
-        return 0;
-    }if((*ST) == NULL){
-        return 0;
+// ----------------------------------------------------
+// 4. FUNÇÕES DE MANIPULAÇÃO
+
+/**
+ * Adiciona um elemento ao topo da pilha (PUSH).
+ * ST - Ponteiro para a Pilha.
+ * dt - Os dados a serem inseridos.
+ * retorna 1 em sucesso, 0 em falha.
+*/
+int insertStack(Stack* ST, struct data dt){ 
+  if(ST == NULL){
+    return 0;
+  }
+  
+  // 1. Aloca e inicializa o novo nó
+  Elem* new_node = (Elem*) malloc(sizeof(Elem));
+  if(new_node == NULL){
+    return 0;
+  }
+  new_node->data = dt;
+  
+  // 2. O novo nó aponta para o antigo topo
+  new_node->next = ST->head;
+  
+  // 3. O 'head' da pilha passa a ser o novo nó
+  ST->head = new_node;
+  
+  // 4. Atualiza o tamanho
+  ST->size++;
+  
+  return 1;
+}
+
+/**
+ * Remove o elemento do topo da pilha (POP).
+ * ST - Ponteiro para a Pilha.
+ * retorna 1 em sucesso, 0 em falha (pilha vazia ou inexistente).
+ */
+int removeStack(Stack* ST){ 
+    if(ST == NULL || ST->head == NULL){
+        return 0; // Pilha inexistente ou vazia
     }
-    *DT = (*ST)->DATA;
+    
+    Elem *node_to_remove = ST->head;
+    
+    // O 'head' passa a apontar para o próximo nó (o novo topo)
+    ST->head = node_to_remove->next;
+    
+    free(node_to_remove);
+    
+    // Atualiza o tamanho
+    ST->size--;
+    
     return 1;
 }
