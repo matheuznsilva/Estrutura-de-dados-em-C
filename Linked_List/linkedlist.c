@@ -1,6 +1,4 @@
 #include "linkedlist.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 // ----------------------------------------------------
 // 1. Definições Internas (Estruturas Ocultas)
@@ -27,22 +25,22 @@ struct list{
 */
 List* create_list(){
 	// Aloca memória para a estrutura de gestão (handle)
-	List *li = (List*) malloc(sizeof(struct list));
+	List *LI = (List*) malloc(sizeof(struct list));
 	
-	if(li != NULL){
-		li->head = NULL; // Inicializa o ponteiro do primeiro elemento como NULL
-        li->size = 0;    // Inicializa o contador de tamanho
+	if(LI != NULL){
+		LI->head = NULL; // Inicializa o ponteiro do primeiro elemento como NULL
+		LI->size = 0;    // Inicializa o contador de tamanho
 	}
-	return li;
+	return LI;
 }
 
 /**
  * Libera a memória de todos os nós e da estrutura de gestão da lista.
- * li - Ponteiro para a estrutura de gestão da lista.
+ * LI - Ponteiro para a estrutura de gestão da lista.
 */
-void free_list(List* li){
-	if(li != NULL){
-		Elem* current_node = li->head;
+void free_list(List* LI){
+	if(LI != NULL){
+		Elem* current_node = LI->head;
 		Elem* next_node;
 		
 		// Loop para liberar cada nó
@@ -51,25 +49,25 @@ void free_list(List* li){
 			free(current_node);		
             current_node = next_node;
 		}
-		free(li); // Libera a estrutura de gestão por último
+		free(LI); // Libera a estrutura de gestão por último
 	}	
 }
 
 // ----------------------------------------------------
 // 3. FUNÇÕES DE CONSULTA
 
-int size_list(const List* li){	
-	if(li == NULL){
+int size_list(const List* LI){	
+	if(LI == NULL){
 		return 0; 
 	}
-    // Retorna o tamanho armazenado, que é O(1). 
-    // Se não armazenássemos, teríamos que percorrer (O(N)).
-	return li->size; 
+	// Retorna o tamanho armazenado, que é O(1). 
+	// Se não armazenássemos, teríamos que percorrer (O(N)).
+	return LI->size; 
 }
 
 // Verifica se a lista está vazia, retorna 1 se vazia ou NULL, 0 caso contrário.
-int empty_list(const List* li){
-	if(li == NULL || li->head == NULL){
+int empty_list(const List* LI){
+	if(LI == NULL || LI->head == NULL){
 		return 1;
 	}
 	return 0;
@@ -95,12 +93,12 @@ static Elem* create_node(struct data dt) {
 
 // ========= Inserção no início da lista. =========
 /** 
- * li - Ponteiro para a estrutura de gestão.
+ * LI - Ponteiro para a estrutura de gestão.
  * dt - Os dados a serem inseridos.
  * retorna 1 em sucesso, 0 em falha.
 */
-int insert_start_list(List* li, struct data dt){
-	if(li == NULL){
+int insert_start_list(List* LI, struct data dt){
+	if(LI == NULL){
 		return 0;
 	}
 	Elem* new_node = create_node(dt);
@@ -108,11 +106,11 @@ int insert_start_list(List* li, struct data dt){
 		return 0;
 	}
     
-	// O novo nó aponta para o antigo primeiro (li->head)
-	new_node->next = li->head;
+	// O novo nó aponta para o antigo primeiro (LI->head)
+	new_node->next = LI->head;
 	// O cabeçalho passa a apontar para o novo nó
-	li->head = new_node;
-    li->size++;
+	LI->head = new_node;
+    LI->size++;
     
 	return 1;
 }
@@ -120,12 +118,12 @@ int insert_start_list(List* li, struct data dt){
 
 // ========= Inserção no final da lista. =========
 /**
- * li - Ponteiro para a estrutura de gestão.
+ * LI - Ponteiro para a estrutura de gestão.
  * dt - Os dados a serem inseridos.
  * retorna 1 em sucesso, 0 em falha.
 */
-int insert_end_list(List* li, struct data dt){
-	if(li == NULL){
+int insert_end_list(List* LI, struct data dt){
+	if(LI == NULL){
 		return 0;
 	}
 	Elem* new_node = create_node(dt);
@@ -133,31 +131,31 @@ int insert_end_list(List* li, struct data dt){
 		return 0;
 	}
 
-	if(li->head == NULL){
+	if(LI->head == NULL){
 		// Se a lista estiver vazia, o novo nó é o primeiro
-		li->head = new_node;
+		LI->head = new_node;
 	} else {
 		// Percorrer a lista até encontrar o último nó
-		Elem *aux = li->head;
+		Elem *aux = LI->head;
 		while(aux->next != NULL){
 			aux = aux->next;
 		}
 		// O último nó passa a apontar para o novo nó
 		aux->next = new_node;
 	}
-    li->size++;
+    LI->size++;
 	return 1;
 }
 
 
 // ========= Inserção ordenada (crescente pelo campo 'num'). =========
 /**
- * li - Ponteiro para a estrutura de gestão.
+ * LI - Ponteiro para a estrutura de gestão.
  * dt - Os dados a serem inseridos.
  * retorna 1 em sucesso, 0 em falha.
 */
-int insert_sorted_list(List* li, struct data dt){
-	if(li == NULL){
+int insert_sorted_list(List* LI, struct data dt){
+	if(LI == NULL){
 		return 0;
 	}
 	Elem* new_node = create_node(dt);
@@ -166,16 +164,16 @@ int insert_sorted_list(List* li, struct data dt){
 	}
 
 	// Caso 1: Lista Vazia
-	if(li->head == NULL){
-		li->head = new_node;
+	if(LI->head == NULL){
+		LI->head = new_node;
 	} else{
         // Caso 2: Inserção no início (matrícula menor que a primeira)
-        if(dt.num < li->head->data.num){
-            new_node->next = li->head;
-            li->head = new_node;
+        if(dt.num < LI->head->data.num){
+            new_node->next = LI->head;
+            LI->head = new_node;
         } else {
             // Caso 3: Inserção no meio ou final
-            Elem *prev, *current = li->head;
+            Elem *prev, *current = LI->head;
             
             // Procura a posição: para no nó onde a matrícula for MAIOR
             while(current != NULL && current->data.num < dt.num){
@@ -188,7 +186,7 @@ int insert_sorted_list(List* li, struct data dt){
             prev->next = new_node; 
         }
 	}
-    li->size++;
+    LI->size++;
 	return 1;
 }
 
@@ -197,45 +195,45 @@ int insert_sorted_list(List* li, struct data dt){
 
 // =========  Remove o elemento do início da lista. ========= 
 /**
- * li - Ponteiro para a estrutura de gestão.
+ * LI - Ponteiro para a estrutura de gestão.
  * retorna 1 em sucesso, 0 em falha (lista inexistente ou vazia).
 */
-int remove_start_list(List* li){
-	if(li == NULL || li->head == NULL){
+int remove_start_list(List* LI){
+	if(LI == NULL || LI->head == NULL){
 		return 0;
 	}
 	
-	Elem *node_to_remove = li->head;
+	Elem *node_to_remove = LI->head;
 	// O novo cabeçalho é o próximo nó
-	li->head = li->head->next;
+	LI->head = LI->head->next;
 	
 	free(node_to_remove);
-    li->size--;
+    LI->size--;
 	return 1;
 }
 
 
 // ========= Remove o elemento do final da lista. ========= 
 /**
- * li - Ponteiro para a estrutura de gestão.
+ * LI - Ponteiro para a estrutura de gestão.
  * retorna 1 em sucesso, 0 em falha.
 */
-int remove_end_list(List* li){
-	if(li == NULL || li->head == NULL){
+int remove_end_list(List* LI){
+	if(LI == NULL || LI->head == NULL){
 		return 0;
 	}
 
 	// Caso especial: apenas um elemento na lista
-	if(li->head->next == NULL){
-		free(li->head);
-		li->head = NULL;
-        li->size--;
+	if(LI->head->next == NULL){
+		free(LI->head);
+		LI->head = NULL;
+        LI->size--;
 		return 1;
 	}
     
   // Caso geral: dois ou mais elementos
-	Elem *prev = li->head;
-  Elem *current = li->head->next;
+	Elem *prev = LI->head;
+  Elem *current = LI->head->next;
     
 	// Percorre até que 'current' seja o último (next == NULL)
 	while(current->next != NULL){
@@ -246,24 +244,24 @@ int remove_end_list(List* li){
 	// 'prev' é o penúltimo nó
 	prev->next = NULL; // O penúltimo passa a ser o novo último
 	free(current);     // Remove o antigo último
-    li->size--;
+    LI->size--;
 	return 1;
 }
 
 
 // ========= Remove um elemento pela matrícula.  ========= 
 /**
- * li - Ponteiro para a estrutura de gestão.
+ * LI - Ponteiro para a estrutura de gestão.
  * num - O número da matrícula a ser removido.
  * retorna 1 em sucesso, 0 em falha.
 */
-int remove_list_by_num(List* li, int num){
-	if(li == NULL || li->head == NULL){
+int remove_list_by_num(List* LI, int num){
+	if(LI == NULL || LI->head == NULL){
 		return 0;
 	}
 
 	Elem *prev = NULL;
-	Elem *current = li->head;
+	Elem *current = LI->head;
     
 	// Procura o nó a ser removido
 	while(current != NULL && current->data.num != num){
@@ -276,16 +274,16 @@ int remove_list_by_num(List* li, int num){
 		return 0;
 	}
     
-	// Caso 1: Remoção do primeiro elemento (current == li->head)
-	if(current == li->head){
-		li->head = current->next;
+	// Caso 1: Remoção do primeiro elemento (current == LI->head)
+	if(current == LI->head){
+		LI->head = current->next;
 	} else{
     // Caso 2: Remoção do meio ou final
 		prev->next = current->next;
 	}
     
 	free(current);
-    li->size--;
+    LI->size--;
 	return 1;
 }
 
@@ -294,17 +292,17 @@ int remove_list_by_num(List* li, int num){
 
 // =========  Busca um elemento pela posição. ========= 
 /**
- * li - Ponteiro constante para a estrutura de gestão.
+ * LI - Ponteiro constante para a estrutura de gestão.
  * pos - A posição (1-baseada) a ser procurada.
  * dt - Ponteiro onde os dados encontrados serão armazenados.
  * retorna 1 em sucesso, 0 em falha.
 */
-int search_list_pos(const List* li, int pos, struct data *dt){
-	if(li == NULL || pos <= 0 || li->head == NULL || pos > li->size){
+int search_list_pos(const List* LI, int pos, struct data *dt){
+	if(LI == NULL || pos <= 0 || LI->head == NULL || pos > LI->size){
 		return 0;
 	}
     
-	Elem *current = li->head;
+	Elem *current = LI->head;
 	for (int i = 1; i < pos; i++){
 		current = current->next;
 	}
@@ -316,17 +314,17 @@ int search_list_pos(const List* li, int pos, struct data *dt){
 
 // ========= Busca um elemento pela matrícula. =========
 /**
- * li - Ponteiro constante para a estrutura de gestão.
+ * LI - Ponteiro constante para a estrutura de gestão.
  * num - A matrícula a ser procurada.
  * dt - Ponteiro onde os dados encontrados serão armazenados.
  * retorna 1 em sucesso, 0 em falha.
 */
-int search_list_num(const List* li, int num, struct data *dt){
-	if(li == NULL || li->head == NULL){
+int search_list_num(const List* LI, int num, struct data *dt){
+	if(LI == NULL || LI->head == NULL){
 		return 0;
 	}
     
-	Elem *current = li->head;
+	Elem *current = LI->head;
     
 	while(current != NULL && current->data.num != num){
 		current = current->next;
@@ -345,24 +343,24 @@ int search_list_num(const List* li, int num, struct data *dt){
 
 /**
  * Imprime todos os elementos da lista.
- * li - Ponteiro constante para a estrutura de gestão.
+ * LI - Ponteiro constante para a estrutura de gestão.
  */
-void print_list(const List* li){
-	if(li == NULL || li->head == NULL){
+void print_list(const List* LI){
+	if(LI == NULL || LI->head == NULL){
 		printf("\nLISTA INEXISTENTE OU VAZIA\n");
         return;
 	}
     
-    printf("\n--- INÍCIO DA LISTA (Tamanho: %d) ---\n", li->size);
-	Elem *current = li->head;
+    printf("\n--- INÍCIO DA LISTA (Tamanho: %d) ---\n", LI->size);
+	Elem *current = LI->head;
     
 	while(current != NULL){
 		printf("======================================\n");
 		printf("NAME: %s\n", current->data.name);
 		printf("NUMBER: %d\n", current->data.num);
-		printf("Nota 1: %.1f\n", current->data.n1);
-		printf("Nota 2: %.1f\n", current->data.n2);
-		printf("Nota 3: %.1f\n", current->data.n3);
+		printf("Nota 1: %.1f\n", current->data.grade_1);
+		printf("Nota 2: %.1f\n", current->data.grade_2);
+		printf("Nota 3: %.1f\n", current->data.grade_3);
 		printf("Media final: %.1f\n", current->data.average);
 		current = current->next;
 	}

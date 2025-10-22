@@ -1,6 +1,8 @@
 #ifndef LINKEDLIST_H
 #define LINKEDLIST_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <stddef.h> // Para size_t
 
 // Definimos o tamanho máximo para o nome do aluno aqui
@@ -11,7 +13,7 @@
 struct data{		
 	int num; // Matricula (usada para ordenação e busca)	
 	char name[MAX_NAME_SIZE];		
-	float n1, n2, n3, average;		
+	float grade_1, grade_2, grade_3, average;		
 };
 
 // Tipo OPACO (Handle) para a Lista encadeada
@@ -23,25 +25,25 @@ typedef struct list List;
 
 // Funções de Gerenciamento da Lista
 List* create_list();
-void free_list(List* li);
-int size_list(const List* li);
-int empty_list(const List* li);
+void free_list(List* LI);
+int size_list(const List* LI);
+int empty_list(const List* LI);
 
 // Funções de Inserção
-int insert_start_list(List* li, struct data dt);
-int insert_end_list(List* li, struct data dt);
-int insert_sorted_list(List* li, struct data dt);
+int insert_start_list(List* LI, struct data dt);
+int insert_end_list(List* LI, struct data dt);
+int insert_sorted_list(List* LI, struct data dt);
 
 // Funções de Remoção
-int remove_start_list(List* li);
-int remove_end_list(List* li);
-int remove_list_by_num(List* li, int num);
+int remove_start_list(List* LI);
+int remove_end_list(List* LI);
+int remove_list_by_num(List* LI, int num);
 
 // Funções de Busca
-int search_list_pos(const List* li, int pos, struct data *dt);
-int search_list_num(const List* li, int num, struct data *dt);
+int search_list_pos(const List* LI, int pos, struct data *dt);
+int search_list_num(const List* LI, int num, struct data *dt);
 
 // Funções de Impressão
-void print_list(const List* li);
+void print_list(const List* LI);
 
 #endif // LINKEDLIST_H

@@ -1,8 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
 #include "linkedlist.h"
 
 int main(){
+  
   // Cria o HANDLE da lista
   List *li = create_list(); 
 
@@ -11,6 +10,7 @@ int main(){
     return 1;
   }
 
+  // Limpeza da memória
   free_list(li);
   printf("\nLista destruída (memória liberada).\n");
   
