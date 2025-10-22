@@ -1,26 +1,47 @@
+#ifndef LINKEDLIST_H
+#define LINKEDLIST_H
 
-#define MAX 100 
+#include <stddef.h> // Para size_t
 
-// STRUCT ONDE SERÃO ARMAZENADOS OS DADOS
+// Definimos o tamanho máximo para o nome do aluno aqui
+#define MAX_NAME_SIZE 100 
+
+// ----------------------------------------------------
+// Estrutura de Dados do Aluno (Informação a ser armazenada)
 struct data{		
-	int num;		
-	char name[MAX];		
+	int num; // Matricula (usada para ordenação e busca)	
+	char name[MAX_NAME_SIZE];		
 	float n1, n2, n3, average;		
 };
 
-typedef struct element* List; // padronização do nome do ponteiro tipo lista
+// Tipo OPACO (Handle) para a Lista encadeada
+// O utilizador só vê o ponteiro, a estrutura interna (struct list)
+typedef struct list List; 
 
-List* create_list();	// criação da lista
-void free_list(List* LI);		// função de destruição da lista
-int search_list_pos(List* LI, int pos, struct data *DT);		// função de busca do elemento pela posição
-int search_list_num(List* LI, int num, struct data *DT);		// função de busca do elemento pela matricula
-int insert_end_list(List* LI, struct data DT);		// função de inserção ao final da lista
-int insert_start_list(List* LI, struct data DT);		// função de inserção no inicio da lista
-int insert_sorted_list(List* LI, struct data DT);		// função de inserção de forma ordenada
-int remove_list(List* LI, int num);		// função de remoção de um elemento especifico
-int remove_start_list(List* LI);		// função de remoção de um elemento no inicio da lista
-int remove_end_list(List* LI);		// função de remoção de um elemento ao final da lista
-int size_list(List* LI);		// função que retorna o tamanho da lista
-int full_list(List *LI);		// função que retorna se a lista esta cheia
-int empty_list(List* LI);		// função que retorna se a lista esta vazia
-void print_list(List* LI);		// função que imprime a lista
+// ----------------------------------------------------
+// PROTÓTIPOS DAS FUNÇÕES
+
+// Funções de Gerenciamento da Lista
+List* create_list();
+void free_list(List* li);
+int size_list(const List* li);
+int empty_list(const List* li);
+
+// Funções de Inserção
+int insert_start_list(List* li, struct data dt);
+int insert_end_list(List* li, struct data dt);
+int insert_sorted_list(List* li, struct data dt);
+
+// Funções de Remoção
+int remove_start_list(List* li);
+int remove_end_list(List* li);
+int remove_list_by_num(List* li, int num);
+
+// Funções de Busca
+int search_list_pos(const List* li, int pos, struct data *dt);
+int search_list_num(const List* li, int num, struct data *dt);
+
+// Funções de Impressão
+void print_list(const List* li);
+
+#endif // LINKEDLIST_H
