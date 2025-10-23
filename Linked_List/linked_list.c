@@ -1,4 +1,4 @@
-#include "linkedlist.h"
+#include "linked_list.h"
 
 // ----------------------------------------------------
 // 1. Definições Internas (Estruturas Ocultas)
@@ -12,8 +12,8 @@ struct element{
 
 // Definição da Estrutura de Gestão da Lista (Handle)
 struct list{
-    Elem *head; // Ponteiro para o primeiro elemento (cabecalho)
-    int size;   // Armazena o tamanho atual da lista (opcional, mas otimiza size_list)
+	Elem *head; // Ponteiro para o primeiro elemento (cabecalho)
+	int size;   // Armazena o tamanho atual da lista (opcional, mas otimiza size_list)
 };
 
 // ----------------------------------------------------
@@ -47,7 +47,7 @@ void free_list(List* LI){
 		while(current_node != NULL){
 			next_node = current_node->next; 
 			free(current_node);		
-            current_node = next_node;
+			current_node = next_node;
 		}
 		free(LI); // Libera a estrutura de gestão por último
 	}	
@@ -82,12 +82,12 @@ int empty_list(const List* LI){
  * return - Retorna o novo nó alocado ou NULL em caso de falha.
 */
 static Elem* create_node(struct data dt) {
-    Elem* new_node = (Elem*) malloc(sizeof(Elem));
-    if (new_node != NULL) {
-        new_node->data = dt;
-        new_node->next = NULL;
-    }
-    return new_node;
+	Elem* new_node = (Elem*) malloc(sizeof(Elem));
+	if (new_node != NULL) {
+		new_node->data = dt;
+		new_node->next = NULL;
+	}
+	return new_node;
 }
 
 
@@ -167,26 +167,26 @@ int insert_sorted_list(List* LI, struct data dt){
 	if(LI->head == NULL){
 		LI->head = new_node;
 	} else{
-        // Caso 2: Inserção no início (matrícula menor que a primeira)
-        if(dt.num < LI->head->data.num){
-            new_node->next = LI->head;
-            LI->head = new_node;
-        } else {
-            // Caso 3: Inserção no meio ou final
-            Elem *prev, *current = LI->head;
-            
-            // Procura a posição: para no nó onde a matrícula for MAIOR
-            while(current != NULL && current->data.num < dt.num){
-                prev = current;
-                current = current->next;
-            }
-            
-            // current é NULL (inserção no final) ou o primeiro nó maior
-            new_node->next = current; 
-            prev->next = new_node; 
-        }
+		// Caso 2: Inserção no início (matrícula menor que a primeira)
+		if(dt.num < LI->head->data.num){
+			new_node->next = LI->head;
+			LI->head = new_node;
+		} else {
+			// Caso 3: Inserção no meio ou final
+			Elem *prev, *current = LI->head;
+			
+			// Procura a posição: para no nó onde a matrícula for MAIOR
+			while(current != NULL && current->data.num < dt.num){
+					prev = current;
+					current = current->next;
+			}
+			
+			// current é NULL (inserção no final) ou o primeiro nó maior
+			new_node->next = current; 
+			prev->next = new_node; 
+		}
 	}
-    LI->size++;
+	LI->size++;
 	return 1;
 }
 
@@ -208,7 +208,7 @@ int remove_start_list(List* LI){
 	LI->head = LI->head->next;
 	
 	free(node_to_remove);
-    LI->size--;
+	LI->size--;
 	return 1;
 }
 
@@ -227,7 +227,7 @@ int remove_end_list(List* LI){
 	if(LI->head->next == NULL){
 		free(LI->head);
 		LI->head = NULL;
-        LI->size--;
+		LI->size--;
 		return 1;
 	}
     
@@ -244,7 +244,7 @@ int remove_end_list(List* LI){
 	// 'prev' é o penúltimo nó
 	prev->next = NULL; // O penúltimo passa a ser o novo último
 	free(current);     // Remove o antigo último
-    LI->size--;
+	LI->size--;
 	return 1;
 }
 
@@ -283,7 +283,7 @@ int remove_list_by_num(List* LI, int num){
 	}
     
 	free(current);
-    LI->size--;
+	LI->size--;
 	return 1;
 }
 
@@ -348,10 +348,10 @@ int search_list_num(const List* LI, int num, struct data *dt){
 void print_list(const List* LI){
 	if(LI == NULL || LI->head == NULL){
 		printf("\nLISTA INEXISTENTE OU VAZIA\n");
-        return;
+		return;
 	}
     
-    printf("\n--- INÍCIO DA LISTA (Tamanho: %d) ---\n", LI->size);
+	printf("\n--- INÍCIO DA LISTA (Tamanho: %d) ---\n", LI->size);
 	Elem *current = LI->head;
     
 	while(current != NULL){
@@ -364,5 +364,5 @@ void print_list(const List* LI){
 		printf("Media final: %.1f\n", current->data.average);
 		current = current->next;
 	}
-    printf("--- FIM DA LISTA ---\n");
+	printf("--- FIM DA LISTA ---\n");
 }
