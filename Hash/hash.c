@@ -1,166 +1,183 @@
-#include <stdlib.h>																								
-#include <stdio.h>
-#include <string.h>
-#include "ListaDinEncad.h"
 #include "hash.h"
-#define MAX 20
 
-// =============== DEFINIÇÃO DO TIPO HASH ===============
+// =============== DEFINIÇÃO DO TIPO HASH GENÉRICO ===============
 
 struct hash{
 	int qtd, TABLE_SIZE;
-	struct word **itens;
+	//List **slots;
+	struct slot_data **slots; // Onde struct word **itens estava
 };
 
 
-// =============== CRIAÇÃO DA TABELA DE HASH ===============
+// =============== CRIAÇÃO DA TABELA DE HASH GENÉRICA ===============
 
 Hash* criaHash(int TABLE_SIZE){
-	Hash* ha = (Hash*)malloc(sizeof(Hash));		// Alocação de memoria para a tabela Hash
-	if(ha != NULL){		// Confere se a alocação funcionou
-		int i;		// Declaração de variável local
-		ha->TABLE_SIZE = TABLE_SIZE;		// Faz o campo que guarda o tamanho da hash receber o tamanho informado pelo usuário
-		ha->itens = (struct word**)malloc(TABLE_SIZE * sizeof(struct word*));		// Alocação de memoria para guardar os itens na  tabela	
-		if(ha->itens == NULL){		// Confere se a alocação funcionou
-			free(ha);		// Se não funcionar o ponteiro é apagado
-			return NULL;		// Retorna-se NULL para informar que deu erro na alocação
-		}
-		ha->qtd = 0;		// Faz o campo que guarda a quantidade de elementos apontar para 0
-		for(i=0; i<ha->TABLE_SIZE; i++){		// Laço de repetição para inicializar todas as posições da tabela com NULL
-			ha->itens[i] = NULL;		// Atribui NULL para todas as posições da tabela
-		}
-	}
-	return ha;		// Retorna o ponteiro da tabela
-}
-
-
-// =============== DESTRUIINDO A TABELA DE HASH ===============
-
-void liberaHash(Hash* ha){ 
-	if(ha != NULL){		// Confere se a tabela existe
-		int i;		// Declaração de variavel local
-		for(i=0; i<ha->TABLE_SIZE; i++){		// Laço de repetição para percorrer a tabela
-			if(ha->itens[i] != NULL){		// Confere se exites elementos na posição i
-				free(ha->itens[i]);		// Caso exista o ponteiro é liberado
-			}
-		}		
-		free(ha->itens);		// O Ponteiro para itens é liberado
-		free(ha);		// O Ponteiro principal é liberado
-	}
-}
-
-
-// =============== FUNÇÃO HASHING ===============
-
-int chaveDiv(int chave, int TABLE_SIZE){		// Função Hashing utilizando metodo da divisão
-	return(chave & 0x7FFFFFFF) % TABLE_SIZE;		// O 0x7FFFFFFF é utilizado para eliminar o bit de sinal
-}
-
-int valorString(char *str){		// Função Hashing utilizando string como chave
-	int i, valor = 7;		// Declaração de variáveis locais
-	int TAM = strlen(str);		// Declaração da variável tam, que recebe a quantidade de caracteres existentes na string
 	
-	for(i=0; i < TAM; i++){		// Laço de repetição para calcular o valor da chave 
-		if(str[i] != ' ' && str[i] != '.' && str[i] != ',' && str[i] != '!'){
-			valor = 31 * valor + (int) str[i];		// 
+	Hash* HA = (Hash*)malloc(sizeof(struct hash));
+	if(HA != NULL){
+		HA->TABLE_SIZE = TABLE_SIZE;
+		HA->slots = (struct slot_data**)malloc(TABLE_SIZE * sizeof(struct slot_data*));
+ 
+		if(HA->slots == NULL){
+			free(HA);
+			return NULL;
+		}
+		HA->qtd = 0;
+		for(int i=0; i<HA->TABLE_SIZE; i++){
+			HA->slots[i] = NULL;
 		}
 	}
-	return valor;		// Retorna o valor da chave
+	return HA;
 }
 
 
-// =============== INSERÇÃO NA HASH ===============
+// =============== DESTRUINDO A TABELA DE HASH GENÉRICA ===============
 
-int insere_Hash(Hash* ha, struct arquivo ar){ 		// função de inserção na hash
-	if (ha == NULL || ha->qtd == ha-> TABLE_SIZE){
+void free_Hash(Hash* HA){ 
+	if(HA != NULL){
+		for(int i=0; i<HA->TABLE_SIZE; i++){
+			if(HA->slots[i] != NULL){
+				free(HA->slots[i]);
+			}
+		}
+		free(HA->slots);
+		free(HA);
+	}
+}
+
+// =============== CALCULO DE CHAVE ===============
+
+// ------ Metodo da divisao ------
+int division_key(int key, int TABLE_SIZE){
+	return (key & 0x7FFFFFFF) % TABLE_SIZE;
+}
+
+// ------ Metodo da multiplicação ------
+int multiplication_key(int key, int TABLE_SIZE){
+	const float A = 0.6180339887; // (sqrt(5) - 1) / 2
+	float frac = (key * A) - (int)(key * A);
+	return (int)(TABLE_SIZE * frac);
+}
+
+// ------ Metodo da dobra ------
+int folding_key(int key, int TABLE_SIZE){
+	int bits_number = 10; // Número de bits a considerar
+	int part_one = key >> bits_number;
+	int part_two = key & (TABLE_SIZE - 1);
+	return (part_one ^ part_two);
+}
+
+// ------ Calculo valor da strings ------
+int string_value(char *str){
+	int valor = 7;
+	int TAM = (int)strlen(str);
+
+	for (int i = 0; i < TAM; i++){
+		// Ignora pontuação
+		if (str[i] != ' ' && str[i] != '.' && str[i] != ',' && str[i] != '!'){
+			valor = 31 * valor + (int)str[i];
+		}
+	}
+	return valor;
+}
+
+// =============== INSERÇÃO NA HASH GENÉRICA ===============
+
+int insert_hash_collisionFree(Hash* HA, struct slot_data data){
+	if (HA == NULL || HA->qtd == HA->TABLE_SIZE){
 		return 0;
 	}
-	int chave = valorString(ar.str);
-	int aux;
-	int pos = chaveDiv(chave, ha->TABLE_SIZE);
-	struct word* novo;
-	printf("\n");
-	
-	if(ha->itens[pos] == NULL){
-	
-		Lista *li; 
-		li = criar_lista();
-		aux = insere_lista_final(li, ar);
-		if(aux == 0){
-			printf("Não Inserido\n");
-			printf("\n-------------------");
-		} else if(aux == 1){
-			fputs(ar.str,stdout);
-			printf("\nInserido");
-			printf("\nposição %d", pos);
-			printf("\n-------------------");
-		}
-		novo = (struct word*) malloc(sizeof(struct word));
-		novo->li = li;
-		novo->contador = 1;
+    
+	int key = data.number;
+	//int key = string_value(data.name);
+	int pos = division_key(key, HA->TABLE_SIZE);
+	//int pos = multiplication_key(key, HA->TABLE_SIZE);
+	//int pos = folding_key(key, HA->TABLE_SIZE);
+	struct slot_data* new_slot = (struct slot_data*) malloc(sizeof(struct slot_data));
 
-		ha->itens[pos] = novo;
-		ha->qtd++;
-		return 1;
-	} else{
-		aux = insere_lista_final(ha->itens[pos]->li, ar);
-		ha->qtd++;
-		if(aux == 0){
-			printf("Não Inserido\n");
-			printf("\n-------------------");
-		} else if(aux == 1){
-			fputs(ar.str,stdout);
-			printf("\nInserido");
-			printf("\nposição %d", pos);
-			printf("\n-------------------");
-		}
+	if (new_slot == NULL){
+		return 0;
 	}
+
+	*new_slot = data; // Copia os dados para o novo slot
+	HA->slots[pos] = new_slot;
+	HA->qtd++;
 	return 1;
 }
 
-
-// =============== BUSCA NA HASH ===============
-
-int busca_Hash(Hash* ha, struct arquivo ar){ 		// função de inserção na hash
-	if (ha == NULL){
+int insert_hash_openAddress(Hash* HA, struct slot_data data){
+	if (HA == NULL || HA->qtd == HA->TABLE_SIZE){
 		return 0;
 	}
-	int chave = valorString(ar.str);
-	int aux;
-	int pos = chaveDiv(chave, ha->TABLE_SIZE);
-	struct word* novo;
+		
+	int key = data.number;
+	//int key = string_value(data.name);
+	int initial_pos = division_key(key, HA->TABLE_SIZE);
+	int new_pos;
+	//int initial_pos = multiplication_key(key, HA->TABLE_SIZE);
+	//int initial_pos = folding_key(key, HA->TABLE_SIZE);
+	for (int i = 0; i < HA->TABLE_SIZE; i++){
+		new_pos = linear_probing(initial_pos, i, HA->TABLE_SIZE);
+		//new_pos = quadratic_probing(initial_pos, i, HA->TABLE_SIZE);
+		//new_pos = double_hashing(initial_pos, key, i, HA->TABLE_SIZE);
 
-	if(ha->itens[pos] == NULL){ // confere se tem algum elemento na lista
-		return 0;
-	}
-
-	novo = ha->itens[pos];
-	Lista *no = novo->li;
-
-	if(strcmp((*no)->dados.str, ar.str)==0){
-		printf("PALAVRA ENCONTRADA!\n");
-		printf("POSIÇÃO: %d\n", pos);
-		return 1;
-	}
-	
-	return 0;
-}
-
-
-// =============== IMPRESSÃO DA HASH ===============
-
-int imprime_Hash(Hash* ha){
-	if (ha == NULL){
-		printf("TABELA NÃO ENCONTRADA");
-		return 0;
-	} else{
-
-		for(int i=0; i<ha->TABLE_SIZE; i++){
-			if(ha->itens[i] != NULL){
-				imprime_lista(ha->itens[i]->li);
+		if (HA->slots[new_pos] == NULL){
+			struct slot_data* new_slot = (struct slot_data*) malloc(sizeof(struct slot_data));
+			if (new_slot == NULL){
+				return 0;
 			}
+
+			*new_slot = data; // Copia os dados para o novo slot
+			HA->slots[new_pos] = new_slot;
+			HA->qtd++;
+			return 1;
 		}
 	}
+	return 0; // Tabela cheia
+}
+
+// =============== BUSCA NA HASH GENÉRICA ===============
+
+int search_hash_collisionFree(Hash* HA, int number, struct slot_data *result){
+	if (HA == NULL){
+		return 0;
+	}
+
+	int pos = division_key(number, HA->TABLE_SIZE);
+	//int pos = multiplication_key(number, HA->TABLE_SIZE);
+	//int pos = folding_key(number, HA->TABLE_SIZE);
+	
+	if (HA->slots[pos] == NULL){
+		return 0; // Slot vazio
+	}
+	
+	*result = *(HA->slots[pos]);
 	return 1;
 }
 
+int search_hash_openAddress(Hash* HA, int number, struct slot_data *result){
+	if (HA == NULL){
+		return 0;
+	}
+
+	int initial_pos = division_key(number, HA->TABLE_SIZE);
+	int new_pos;
+	//int initial_pos = multiplication_key(number, HA->TABLE_SIZE);
+	//int initial_pos = folding_key(number, HA->TABLE_SIZE);
+
+	for (int i = 0; i < HA->TABLE_SIZE; i++){
+		new_pos = linear_probing(initial_pos, i, HA->TABLE_SIZE);
+		//new_pos = quadratic_probing(initial_pos, i, HA->TABLE_SIZE);
+		//new_pos = double_hashing(initial_pos, key, i, HA->TABLE_SIZE);
+
+		if (HA->slots[new_pos] == NULL){
+			return 0; // Slot vazio
+		}
+		
+		if (HA->slots[new_pos]->number == number){
+			*result = *(HA->slots[new_pos]);
+			return 1; // Encontrado
+		}
+	}
+	return 0; // Não encontrado
+}
