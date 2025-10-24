@@ -1,5 +1,7 @@
 {
   "files.associations": {
-    "linkedlist.h": "c"
+    "linkedlist.h": "c",
+    "linked_list.h": "c",
+    "hash.h": "c"
   }
 }

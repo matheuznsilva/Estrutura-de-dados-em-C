@@ -23,6 +23,7 @@ A estrutura de pastas do repositório foi organizada para facilitar a utilizaç�
 ```
 .
 └── Estrutura de dados em C/
+        ├── Binary_Tree/    # Possui algoritmo de Arvore Binaria
         ├── File/           # Possui algoritmo de manipulação de arquivos
         ├── Hash/           # Possui algoritmo de Tabela Hash
         ├── Linked_List/    # Possui algoritmo de Lista Encadeada
