@@ -1,22 +1,24 @@
 #include "hash.h"
 
+
 // =============== DEFINIÇÃO DO TIPO HASH GENÉRICO ===============
 
 struct hash{
 	int qtd, TABLE_SIZE;
 	//List **slots;
-	struct slot_data **slots; // Onde struct word **itens estava
+	SlotData **slots;
 };
 
 
 // =============== CRIAÇÃO DA TABELA DE HASH GENÉRICA ===============
 
-Hash* criaHash(int TABLE_SIZE){
+Hash* create_Hash(int TABLE_SIZE){
 	
 	Hash* HA = (Hash*)malloc(sizeof(struct hash));
 	if(HA != NULL){
 		HA->TABLE_SIZE = TABLE_SIZE;
-		HA->slots = (struct slot_data**)malloc(TABLE_SIZE * sizeof(struct slot_data*));
+		// Aloca o array de ponteiros para SlotData
+		HA->slots = (SlotData**)malloc(TABLE_SIZE * sizeof(SlotData*));
  
 		if(HA->slots == NULL){
 			free(HA);
@@ -45,11 +47,12 @@ void free_Hash(Hash* HA){
 	}
 }
 
-// =============== CALCULO DE CHAVE ===============
+// =============== FUNÇÕES AUXILIARES DE CÁLCULO DE CHAVE E SONDAGEM ===============
 
 // ------ Metodo da divisao ------
 int division_key(int key, int TABLE_SIZE){
-	return (key & 0x7FFFFFFF) % TABLE_SIZE;
+	// O & 0x7FFFFFFF garante que a chave seja não negativa, se necessário
+	return (key & 0x7FFFFFFF) % TABLE_SIZE; 
 }
 
 // ------ Metodo da multiplicação ------
@@ -63,12 +66,12 @@ int multiplication_key(int key, int TABLE_SIZE){
 int folding_key(int key, int TABLE_SIZE){
 	int bits_number = 10; // Número de bits a considerar
 	int part_one = key >> bits_number;
-	int part_two = key & (TABLE_SIZE - 1);
+	int part_two = key & ((1 << bits_number) - 1);
 	return (part_one ^ part_two);
 }
 
 // ------ Calculo valor da strings ------
-int string_value(char *str){
+int calculate_String_value(char *str){
 	int valor = 7;
 	int TAM = (int)strlen(str);
 
@@ -78,25 +81,50 @@ int string_value(char *str){
 			valor = 31 * valor + (int)str[i];
 		}
 	}
-	return valor;
+	return (valor & 0x7FFFFFFF);
+}
+
+// ------ Sondagem Linear ------
+int linear_probing(int initial_pos, int i, int TABLE_SIZE){
+	return ((initial_pos + i) & 0x7FFFFFFF) % TABLE_SIZE;
+}
+
+// ------ Sondagem Quadrática ------
+int quadratic_probing(int initial_pos, int i, int TABLE_SIZE){
+	initial_pos = initial_pos + (2*i) + (5*(i*i));
+	return (initial_pos & 0x7FFFFFFF) % TABLE_SIZE;
+}
+
+// ----- Double Hashing (Hash Dupla) -----
+int double_hashing(int hash_one, int key, int i, int TABLE_SIZE){
+	int hash_two = division_key(key, TABLE_SIZE - 1) + 1;
+	return ((hash_one + i * hash_two) & 0x7FFFFFFF) % TABLE_SIZE;
 }
 
 // =============== INSERÇÃO NA HASH GENÉRICA ===============
 
-int insert_hash_collisionFree(Hash* HA, struct slot_data data){
+// ------ (Endereçamento Direto/Sem Colisão) ------
+int insert_hash_collisionFree(Hash* HA, SlotData data){
 	if (HA == NULL || HA->qtd == HA->TABLE_SIZE){
-		return 0;
+		return 0;		// Erro ou tabela cheia
 	}
     
-	int key = data.number;
+	int key = data.key;
 	//int key = string_value(data.name);
+
+	// Calcula a posição inicial
 	int pos = division_key(key, HA->TABLE_SIZE);
 	//int pos = multiplication_key(key, HA->TABLE_SIZE);
 	//int pos = folding_key(key, HA->TABLE_SIZE);
-	struct slot_data* new_slot = (struct slot_data*) malloc(sizeof(struct slot_data));
 
+	// Verifica se a posição já está ocupada (tratamento simples/sem colisão)
+	if (HA->slots[pos] != NULL) {
+		return 0; // Colisão não tratada, inserção falha
+	}
+
+	SlotData* new_slot = (SlotData*) malloc(sizeof(SlotData));
 	if (new_slot == NULL){
-		return 0;
+		return 0; // Falha na alocação
 	}
 
 	*new_slot = data; // Copia os dados para o novo slot
@@ -105,26 +133,32 @@ int insert_hash_collisionFree(Hash* HA, struct slot_data data){
 	return 1;
 }
 
-int insert_hash_openAddress(Hash* HA, struct slot_data data){
+// ------ (Endereçamento Aberto) ------
+int insert_hash_openAddress(Hash* HA, SlotData data){
 	if (HA == NULL || HA->qtd == HA->TABLE_SIZE){
 		return 0;
 	}
 		
-	int key = data.number;
+	int key = data.key;
 	//int key = string_value(data.name);
 	int initial_pos = division_key(key, HA->TABLE_SIZE);
-	int new_pos;
 	//int initial_pos = multiplication_key(key, HA->TABLE_SIZE);
 	//int initial_pos = folding_key(key, HA->TABLE_SIZE);
+	int new_pos;
+
+	// Tenta encontrar uma posição livre usando sondagem
 	for (int i = 0; i < HA->TABLE_SIZE; i++){
+
+		// Use a sondagem que desejar (ex: linear_probing)
 		new_pos = linear_probing(initial_pos, i, HA->TABLE_SIZE);
 		//new_pos = quadratic_probing(initial_pos, i, HA->TABLE_SIZE);
 		//new_pos = double_hashing(initial_pos, key, i, HA->TABLE_SIZE);
 
 		if (HA->slots[new_pos] == NULL){
-			struct slot_data* new_slot = (struct slot_data*) malloc(sizeof(struct slot_data));
+			// Encontrou slot vazio, aloca e insere
+			SlotData* new_slot = (SlotData*) malloc(sizeof(SlotData));
 			if (new_slot == NULL){
-				return 0;
+				return 0;		// Falha na alocação
 			}
 
 			*new_slot = data; // Copia os dados para o novo slot
@@ -138,34 +172,43 @@ int insert_hash_openAddress(Hash* HA, struct slot_data data){
 
 // =============== BUSCA NA HASH GENÉRICA ===============
 
-int search_hash_collisionFree(Hash* HA, int number, struct slot_data *result){
+// ------ (Endereçamento Direto/Sem Colisão) ------
+int search_hash_collisionFree(Hash* HA, int key, SlotData *result){
 	if (HA == NULL){
 		return 0;
 	}
 
-	int pos = division_key(number, HA->TABLE_SIZE);
-	//int pos = multiplication_key(number, HA->TABLE_SIZE);
-	//int pos = folding_key(number, HA->TABLE_SIZE);
+	int pos = division_key(key, HA->TABLE_SIZE);
+	//int pos = multiplication_key(key, HA->TABLE_SIZE);
+	//int pos = folding_key(key, HA->TABLE_SIZE);
 	
 	if (HA->slots[pos] == NULL){
 		return 0; // Slot vazio
 	}
-	
-	*result = *(HA->slots[pos]);
-	return 1;
+
+	// Verifica se a chave do dado no slot corresponde à chave buscada
+	if (HA->slots[pos]->key == key){
+		*result = *(HA->slots[pos]);
+		return 1;
+	}
+
+	return 0; // Não encontrado
 }
 
-int search_hash_openAddress(Hash* HA, int number, struct slot_data *result){
+// ------ (Endereçamento Aberto) ----------
+int search_hash_openAddress(Hash* HA, int key, SlotData *result){
 	if (HA == NULL){
 		return 0;
 	}
 
-	int initial_pos = division_key(number, HA->TABLE_SIZE);
+	int initial_pos = division_key(key, HA->TABLE_SIZE);
+	//int initial_pos = multiplication_key(key, HA->TABLE_SIZE);
+	//int initial_pos = folding_key(key, HA->TABLE_SIZE);
 	int new_pos;
-	//int initial_pos = multiplication_key(number, HA->TABLE_SIZE);
-	//int initial_pos = folding_key(number, HA->TABLE_SIZE);
 
 	for (int i = 0; i < HA->TABLE_SIZE; i++){
+
+		// Use a MESMA sondagem que foi usada na inserção
 		new_pos = linear_probing(initial_pos, i, HA->TABLE_SIZE);
 		//new_pos = quadratic_probing(initial_pos, i, HA->TABLE_SIZE);
 		//new_pos = double_hashing(initial_pos, key, i, HA->TABLE_SIZE);
@@ -174,7 +217,7 @@ int search_hash_openAddress(Hash* HA, int number, struct slot_data *result){
 			return 0; // Slot vazio
 		}
 		
-		if (HA->slots[new_pos]->number == number){
+		if (HA->slots[new_pos]->key == key){
 			*result = *(HA->slots[new_pos]);
 			return 1; // Encontrado
 		}

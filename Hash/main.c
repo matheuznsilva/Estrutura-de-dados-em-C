@@ -4,12 +4,11 @@
 
 int main(){
 
+	// Criação da Tabela Hash
 	Hash *HA = create_Hash(TAMANHO_HASH);
 
-	// Garante que a memória é liberada antes de sair
-	if (HA != NULL){
-		free_Hash(HA);
-	}
+	// Liberação de Memória
+	free_Hash(HA);
 
 	return 0;
 }
