@@ -8,6 +8,7 @@ Atualmente, o repositório contém as seguintes estruturas de dados e algoritmos
 
 | Estrutura/Algoritmo | Descrição | Implementação em |
 | :--- | :--- | :--- |
+| **Árvore Binária de Busca (ABB)** (`Binary_Tree/`) | Implementação de Árvore Binária de Busca para inserção, remoção, consulta e travessia (`in-order`, `pre-order`, `post-order`) eficiente de elementos. | C |
 | **Lista Encadeada** (`Linked_List/`) | Implementação básica de listas ligadas para inserção, remoção e travessia de elementos. | C |
 | **Pilha** (`Stack/`) | Estrutura de dados *Last-In, First-Out* (LIFO) com as operações padrão `push` e `pop`. | C |
 | **Tabela Hash** (`Hash/`) | Implementação de Tabela Hash para armazenamento e recuperação eficiente de dados, utilizando um método de tratamento de colisões. | C |
@@ -16,10 +17,6 @@ Atualmente, o repositório contém as seguintes estruturas de dados e algoritmos
 ## Estrutura do Projeto
 
 A estrutura de pastas do repositório foi organizada para modularizar cada estrutura de dados, facilitando a navegação e a inclusão em seus projetos:
-
-## Estrutura do Projeto:
-
-A estrutura de pastas do repositório foi organizada para facilitar a utilização:
 ```
 .
 └── Estrutura de dados em C/
@@ -39,20 +36,37 @@ Para utilizar qualquer um dos algoritmos em seu projeto, siga os passos básicos
 
 ### Pré-requisitos
 * gcc (GNU Compiler Collection)
+* make (Para compilação usando o Makefile)
 
-### Passo 1
-Adicione os arquivos de cabeçalho (`.h`) e de código-fonte (`.c`) das bibliotecas desejadas (ex: `Linked_List/`) no diretório da sua aplicação principal.
+### Passo 1: Inclusão dos Arquivos
+Adicione os arquivos de cabeçalho (`.h`) e de código-fonte (`.c`) das bibliotecas desejadas (ex: `Binary_Tree/b_tree.h` e `Binary_Tree/b_tree.c`) no diretório da sua aplicação principal.
 
-### Passo 2
+### Passo 2: Importação no Código
 No seu código principal (`main.c` ou similar), importe a biblioteca usando a diretiva `#include`:
 ```c
 #include "nome_da_biblioteca.h" 
-// Exemplo: #include "linked_list.h"
+// Exemplo: #include "b_tree.h"
 ```
 Após a inclusão, declare a variável do tipo da estrutura para começar a utilizá-la e acessar suas funções.
 
-### Passo 3
-Compile e execute o seu projeto usando o gcc, garantindo que você inclua todos os arquivos .c necessários.
+### Passo 3: Compilação e Execução (Usando Makefile)
+Para projetos mais complexos e que utilizam várias bibliotecas, é recomendado usar o Makefile de exemplo.
+
+#### Compilação: 
+Navegue até o diretório que contém o Makefile e os arquivos .c, e execute:
+
+```bash
+make
+```
+
+#### Execução: 
+Após a compilação bem-sucedida, execute o binário gerado (geralmente main ou prog):
+
+```bash
+./main 
+# ou
+./<nome_do_executavel>
+```
 
 ## Licença
 Este projeto está sob a licença MIT License.
