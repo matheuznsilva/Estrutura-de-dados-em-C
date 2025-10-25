@@ -27,6 +27,7 @@ A estrutura de pastas do repositório foi organizada para facilitar a utilizaç�
         ├── File/           # Possui algoritmo de manipulação de arquivos
         ├── Hash/           # Possui algoritmo de Tabela Hash
         ├── Linked_List/    # Possui algoritmo de Lista Encadeada
+        ├── Makefile/       # Possui Exemplo de makefile
         ├── Stack/          # Possui algoritmo de Pilha
         ├── LICENSE
         └── README.md
